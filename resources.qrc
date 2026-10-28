@@ -1,0 +1,22 @@
+<RCC>
+  <qresource prefix="/icons">
+    <file>assets/icons/brush.svg</file>
+    <file>assets/icons/colorize.svg</file>
+    <file>assets/icons/colors.svg</file>
+    <file>assets/icons/edit_vertices.svg</file>
+    <file>assets/icons/info.svg</file>
+    <file>assets/icons/ink_eraser.svg</file>
+    <file>assets/icons/measure.svg</file>
+    <file>assets/icons/palette.svg</file>
+    <file>assets/icons/pan_tool.svg</file>
+    <file>assets/icons/polygon.svg</file>
+    <file>assets/icons/redo.svg</file>
+    <file>assets/icons/save_as.svg</file>
+    <file>assets/icons/select.svg</file>
+    <file>assets/icons/settings.svg</file>
+    <file>assets/icons/undo.svg</file>
+    <file>assets/icons/visibility.svg</file>
+    <file>assets/icons/visibility_off.svg</file>
+    <file>assets/icons/wand_stars.svg</file>
+  </qresource>
+</RCC>
