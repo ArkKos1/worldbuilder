@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1400</width>
-    <height>899</height>
+    <width>1404</width>
+    <height>907</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -25,41 +25,6 @@
      <widget class="QWidget" name="canvasContainer" native="true"/>
     </item>
    </layout>
-  </widget>
-  <widget class="QToolBar" name="toolBar_2">
-   <property name="windowTitle">
-    <string>Tools</string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Orientation::Vertical</enum>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionSelect"/>
-   <addaction name="actionBrush"/>
-   <addaction name="actionPolygon"/>
-   <addaction name="actionPan"/>
-   <addaction name="actionEdit_Vertices"/>
-   <addaction name="actionMeasure"/>
   </widget>
   <widget class="QDockWidget" name="propDock">
    <property name="minimumSize">
@@ -248,7 +213,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1400</width>
+     <width>1404</width>
      <height>33</height>
     </rect>
    </property>
@@ -260,49 +225,49 @@
      <property name="title">
       <string>New World</string>
      </property>
-     <addaction name="actionPlanet"/>
+     <addaction name="planetAction"/>
     </widget>
     <addaction name="menuNew_World"/>
-    <addaction name="actionOpen_Project"/>
-    <addaction name="actionSave"/>
-    <addaction name="actionSave_As"/>
-    <addaction name="actionExport"/>
+    <addaction name="openProjectAction"/>
+    <addaction name="saveAction"/>
+    <addaction name="saveAsAction"/>
+    <addaction name="exportAction"/>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
+    <addaction name="exitAction"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
+    <addaction name="undoAction"/>
+    <addaction name="redoAction"/>
     <addaction name="separator"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
+    <addaction name="cutAction"/>
+    <addaction name="copyAction"/>
+    <addaction name="pasteAction"/>
     <addaction name="separator"/>
-    <addaction name="actionPreferences"/>
+    <addaction name="preferencesAction"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionZoom_In"/>
-    <addaction name="actionZoom_Out"/>
-    <addaction name="actionReset_Zoom"/>
+    <addaction name="zoomInAction"/>
+    <addaction name="zoomOutAction"/>
+    <addaction name="zoomResetAction"/>
     <addaction name="separator"/>
     <addaction name="actionProjection"/>
-    <addaction name="actionToggle_Grid"/>
+    <addaction name="gridToggleAction"/>
     <addaction name="actionFull_Screen"/>
     <addaction name="separator"/>
-    <addaction name="actionProperties_Panel"/>
-    <addaction name="actionLayers_Panel"/>
+    <addaction name="propertiesPanelAction"/>
+    <addaction name="layersPanelAction"/>
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
      <string>Project</string>
     </property>
-    <addaction name="actionWorld_Properties"/>
+    <addaction name="worldPropsAction"/>
     <addaction name="actionCoordinate_System"/>
     <addaction name="actionUnits"/>
     <addaction name="actionProject_Settings"/>
@@ -311,20 +276,20 @@
     <property name="title">
      <string>Layer</string>
     </property>
-    <addaction name="actionNew_Layer"/>
-    <addaction name="actionDuplicate_Layer"/>
-    <addaction name="actionDelete_Layer"/>
-    <addaction name="actionRename_Layer"/>
+    <addaction name="newLayerAction"/>
+    <addaction name="duplicateLayerAction"/>
+    <addaction name="deleteLayerAction"/>
+    <addaction name="renameLayerAction"/>
    </widget>
    <widget class="QMenu" name="menu_6">
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionSelect"/>
-    <addaction name="actionBrush"/>
-    <addaction name="actionLine"/>
-    <addaction name="actionPolygon"/>
-    <addaction name="actionMeasure"/>
+    <addaction name="selectAction"/>
+    <addaction name="brushAction"/>
+    <addaction name="lineAction"/>
+    <addaction name="polygonAction"/>
+    <addaction name="measureAction"/>
    </widget>
    <widget class="QMenu" name="menu_7">
     <property name="title">
@@ -346,77 +311,363 @@
    <addaction name="menu_8"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionPlanet">
+  <widget class="QDockWidget" name="toolsDock">
+   <property name="minimumSize">
+    <size>
+     <width>216</width>
+     <height>160</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Tools</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="chooseButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/brush.svg</normaloff>:/icons/assets/icons/brush.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="selectButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/select.svg</normaloff>:/icons/assets/icons/select.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QToolButton" name="panButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/pan_tool.svg</normaloff>:/icons/assets/icons/pan_tool.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QToolButton" name="brushButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/brush.svg</normaloff>:/icons/assets/icons/brush.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QToolButton" name="eraserButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/ink_eraser.svg</normaloff>:/icons/assets/icons/ink_eraser.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QToolButton" name="fillButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/colors.svg</normaloff>:/icons/assets/icons/colors.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QToolButton" name="polygonButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/polygon.svg</normaloff>:/icons/assets/icons/polygon.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QToolButton" name="editVerticesButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/edit_vertices.svg</normaloff>:/icons/assets/icons/edit_vertices.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QToolButton" name="measureButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/measure.svg</normaloff>:/icons/assets/icons/measure.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QToolButton" name="pipetteButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/colorize.svg</normaloff>:/icons/assets/icons/colorize.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QToolButton" name="magicWandButton">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::DefaultContextMenu</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources.qrc">
+             <normaloff>:/icons/assets/icons/wand_stars.svg</normaloff>:/icons/assets/icons/wand_stars.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>17</width>
+           <height>288</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="paramsDock">
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Parameters</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QStackedWidget" name="toolOptionStacked">
+       <widget class="QWidget" name="page"/>
+       <widget class="QWidget" name="page_2"/>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="planetAction">
    <property name="text">
     <string>Planet...</string>
    </property>
   </action>
-  <action name="actionOpen_Project">
+  <action name="openProjectAction">
    <property name="text">
     <string>Open Project...</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="saveAction">
    <property name="text">
     <string>Save</string>
    </property>
   </action>
-  <action name="actionSave_As">
+  <action name="saveAsAction">
    <property name="text">
     <string>Save As...</string>
    </property>
   </action>
-  <action name="actionExport">
+  <action name="exportAction">
    <property name="text">
     <string>Export...</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="exitAction">
    <property name="text">
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionUndo">
+  <action name="undoAction">
    <property name="text">
     <string>Undo</string>
    </property>
   </action>
-  <action name="actionRedo">
+  <action name="redoAction">
    <property name="text">
     <string>Redo</string>
    </property>
   </action>
-  <action name="actionCut">
+  <action name="cutAction">
    <property name="text">
     <string>Cut</string>
    </property>
   </action>
-  <action name="actionCopy">
+  <action name="copyAction">
    <property name="text">
     <string>Copy</string>
    </property>
   </action>
-  <action name="actionPaste">
+  <action name="pasteAction">
    <property name="text">
     <string>Paste</string>
    </property>
   </action>
-  <action name="actionPreferences">
+  <action name="preferencesAction">
    <property name="text">
     <string>Preferences...</string>
    </property>
   </action>
-  <action name="actionZoom_In">
+  <action name="zoomInAction">
    <property name="text">
     <string>Zoom In</string>
    </property>
   </action>
-  <action name="actionZoom_Out">
+  <action name="zoomOutAction">
    <property name="text">
     <string>Zoom Out</string>
    </property>
   </action>
-  <action name="actionReset_Zoom">
+  <action name="zoomResetAction">
    <property name="text">
     <string>Reset Zoom</string>
    </property>
@@ -426,7 +677,7 @@
     <string>Projection</string>
    </property>
   </action>
-  <action name="actionToggle_Grid">
+  <action name="gridToggleAction">
    <property name="text">
     <string>Toggle Grid</string>
    </property>
@@ -436,17 +687,17 @@
     <string>Full Screen</string>
    </property>
   </action>
-  <action name="actionProperties_Panel">
+  <action name="propertiesPanelAction">
    <property name="text">
     <string>Properties Panel</string>
    </property>
   </action>
-  <action name="actionLayers_Panel">
+  <action name="layersPanelAction">
    <property name="text">
     <string>Layers Panel</string>
    </property>
   </action>
-  <action name="actionWorld_Properties">
+  <action name="worldPropsAction">
    <property name="text">
     <string>World Properties...</string>
    </property>
@@ -466,27 +717,27 @@
     <string>Project Settings...</string>
    </property>
   </action>
-  <action name="actionNew_Layer">
+  <action name="newLayerAction">
    <property name="text">
     <string>New Layer</string>
    </property>
   </action>
-  <action name="actionDuplicate_Layer">
+  <action name="duplicateLayerAction">
    <property name="text">
     <string>Duplicate Layer</string>
    </property>
   </action>
-  <action name="actionDelete_Layer">
+  <action name="deleteLayerAction">
    <property name="text">
     <string>Delete Layer</string>
    </property>
   </action>
-  <action name="actionRename_Layer">
+  <action name="renameLayerAction">
    <property name="text">
     <string>Rename Layer</string>
    </property>
   </action>
-  <action name="actionSelect">
+  <action name="selectAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/select.svg</normaloff>:/icons/assets/icons/select.svg</iconset>
@@ -498,7 +749,7 @@
     <string>Select objects</string>
    </property>
   </action>
-  <action name="actionBrush">
+  <action name="brushAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/brush.svg</normaloff>:/icons/assets/icons/brush.svg</iconset>
@@ -510,7 +761,7 @@
     <string>Paint with brush</string>
    </property>
   </action>
-  <action name="actionLine">
+  <action name="lineAction">
    <property name="text">
     <string>Line</string>
    </property>
@@ -518,7 +769,7 @@
     <string>Draw a line</string>
    </property>
   </action>
-  <action name="actionPolygon">
+  <action name="polygonAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/polygon.svg</normaloff>:/icons/assets/icons/polygon.svg</iconset>
@@ -530,7 +781,7 @@
     <string>Create a polygon</string>
    </property>
   </action>
-  <action name="actionPan">
+  <action name="panAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/pan_tool.svg</normaloff>:/icons/assets/icons/pan_tool.svg</iconset>
@@ -542,7 +793,7 @@
     <string>Move around the canvas</string>
    </property>
   </action>
-  <action name="actionEdit_Vertices">
+  <action name="editVerticesAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/edit_vertices.svg</normaloff>:/icons/assets/icons/edit_vertices.svg</iconset>
@@ -554,7 +805,7 @@
     <string>Edit polygon vertices</string>
    </property>
   </action>
-  <action name="actionMeasure">
+  <action name="measureAction">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/assets/icons/measure.svg</normaloff>:/icons/assets/icons/measure.svg</iconset>
@@ -564,6 +815,18 @@
    </property>
    <property name="toolTip">
     <string>Measure distance</string>
+   </property>
+  </action>
+  <action name="magicWandAction">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/assets/icons/wand_stars.svg</normaloff>:/icons/assets/icons/wand_stars.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Magic Wand</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>

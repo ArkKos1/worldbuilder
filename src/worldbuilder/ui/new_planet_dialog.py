@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
   QMessageBox,
 )
 from PySide6.QtUiTools import QUiLoader
-from src.worldbuilder.domain.planet import Planet
+from src.worldbuilder.objects.planet import Planet
 
 class NewPlanetDialog:
   def __init__(self,parent=None):
