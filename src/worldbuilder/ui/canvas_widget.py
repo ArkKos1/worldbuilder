@@ -1,83 +1,102 @@
 from PySide6.QtWidgets import QWidget
-from PySide6.QtGui import QPainter,QColor,QPen,QFont
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QPainter,QColor, QPen
+from PySide6.QtCore import Qt, QPointF
+
 
 class CanvasWidget(QWidget):
-  def __init__(self,parent=None,color=(0,0,0),width=1):
+  def __init__(self,parent=None):
     super().__init__(parent)
-    self.setMinimumSize(400,300)
+    self.setMinimumSize(400,400)
     self.setMouseTracking(True)
-    self.strokes = []
-    self.current_stroke = None
-    r,g,b = color
-    self.width = width
-    self.color = QColor(r,g,b)
+    self.setFocusPolicy(Qt.StrongFocus)
+    self.renderer = None
+    self.tool = None
+    # Camera
+    self._scale = 1.0
+    self._offset = QPointF(0,0)
+    self._panning = False
+    self._last_mouse_pos = QPointF()
 
-  def paintEvent(self,event):
+
+  def set_tool(self,tool):
+    self.tool = tool
+    if tool:
+      tool.changed.connect(self.update)
+
+  def set_renderer(self,renderer):
+    self.renderer = renderer
+    self.update()
+
+  
+  def paintEvent(self, event):
     painter = QPainter(self)
-
-    painter.fillRect(
-      self.rect(),
-      QColor(255,255,255)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing,True)
+    painter.setRenderHint(
+      QPainter.RenderHint.SmoothPixmapTransform,
+      self._scale < 5.0,
     )
 
-    for stroke in self.strokes:
-      self.draw_stroke(painter,stroke)
+    painter.fillRect(self.rect(), QColor("#434B4D"))
+    painter.translate(self._offset)
+    painter.scale(self._scale,self._scale)
 
-    if self.current_stroke is not None:
-      self.draw_stroke(painter,self.current_stroke)
+    if self.tool and hasattr(self.tool, "doc") and self.tool.doc:
+      layer = self.tool.doc.layers[0]
+      if layer.image:
+        painter.drawImage(0,0,layer.image)
+    else:
+      painter.fillRect(0,0,1400,800,QColor(255,255,255))
+    # if self.renderer:
+    #   self.renderer.paint(painter)
+    # else:
+    #   painter.fillRect(0,0,1400,800,QColor(255,255,255))
 
-
-  def set_tool(self,name):
-    pass
+  def _screen_to_canvas(self,screen_pos):
+    return (screen_pos - self._offset)/self._scale
+    
 
   def mousePressEvent(self,event):
-    if event.button() == Qt.MouseButton.LeftButton:
-      self.current_stroke = {
-        "color": self.color,
-        "width": self.width,
-        "points": [event.position()]
-      }
-      self.update()
+    if event.button() == Qt.MouseButton.RightButton:
+      self._panning = True
+      self._last_mouse_pos = event.position()
+      self.setCursor(Qt.CursorShape.ClosedHandCursor)
+      return
+    
+    if self.tool and event.button() == Qt.MouseButton.LeftButton:
+      pos = self._screen_to_canvas(event.position())
+      self.tool.on_press(pos,event.button())
+  
 
   def mouseMoveEvent(self, event):
-    if self.current_stroke is not None:
-      self.current_stroke["points"].append(event.position())
+    if self._panning:
+      delta = event.position() - self._last_mouse_pos
+      self._offset += delta
+      self._last_mouse_pos = event.position()
       self.update()
-
-  def mouseReleaseEvent(self,event):
-    if (
-      event.button() == Qt.MouseButton.LeftButton
-      and self.current_stroke is not None 
-    ):
-      self.strokes.append(self.current_stroke)
-      self.current_stroke = None
-      self.update()
-
-  def draw_stroke(self,painter,stroke):
-    points = stroke["points"]
-
-    if not points:
       return
     
-    pen = QPen(stroke["color"])
-    pen.setWidthF(float(stroke["width"]))
-    pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-    pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-    painter.setPen(pen)
+    if self.tool:
+      pos = self._screen_to_canvas(event.position())
+      self.tool.on_move(pos,event.buttons())
 
-    if len(points) == 1:
-      painter.drawPoint(points[0])
+  
+  def mouseReleaseEvent(self, event):
+    if event.button() == Qt.MouseButton.RightButton:
+      self._panning = False
+      self.setCursor(Qt.CursorShape.CrossCursor)
       return
     
-    for index in range(len(points)-1):
-      painter.drawLine(
-        points[index],
-        points[index+1]
-      )
-      
-  def set_brush_color(self, color:QColor):
-    self.color = QColor(color)
+    if self.tool and event.button() == Qt.MouseButton.LeftButton:
+      pos = self._screen_to_canvas(event.position())
+      self.tool.on_release(pos,event.button())
+  
 
-  def set_brush_size(self,size:int):
-    self.width = size
+  def wheelEvent(self, event):
+    zoom_factor = 1.15 if event.angleDelta().y() > 0 else 1/1.15
+    old_pos = self._screen_to_canvas(event.position())
+    self._scale *= zoom_factor
+    self._scale = max(0.1, min(self._scale,10.0))
+    new_pos = self._screen_to_canvas(event.position())
+    self._offset += (new_pos-old_pos) * self._scale
+    self.update()
+    

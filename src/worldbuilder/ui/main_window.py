@@ -14,84 +14,8 @@ from PySide6.QtWidgets import (
 from src.worldbuilder.ui.new_planet_dialog import NewPlanetDialog
 from src.worldbuilder.ui.canvas_widget import CanvasWidget
 from src.worldbuilder.ui.widgets.parameters.brush import BrushOptionsWidget
-
-
-class MainWindow:
-  def __init__(self,parents=None):
-    loader = QUiLoader()
-    ui_file = QFile("ui/main_window.ui")
-    self.window = loader.load(ui_file,parents)
-    ui_file.close()
-    self.color = (0,0,0)
-    # Дети
-    self.new_planet_action = self.window.findChild(
-      QAction, "actionPlanet"
-    )
-    
-    self.canvas_container = self.window.findChild(
-      QWidget, "canvasContainer"
-    )
-
-    self.tool_options = self.window.findChild(
-      QStackedWidget, "toolOptionStacked"
-    )
-
-    self.brush_button = self.window.findChild(
-      QToolButton, "brushButton"
-    )
-
-    # Параметры инструментов
-
-    self.brush_button.clicked.connect(
-      self.press_brush_button
-    )
-
-
-    self.new_planet_action.triggered.connect(self.open_new_planet_dialog)
-    layout = self.canvas_container.layout()
-    if layout is None:
-      layout = QVBoxLayout(self.canvas_container)
-      layout.setContentsMargins(0, 0, 0, 0)
-      layout.setSpacing(0)
-    self.canvas = CanvasWidget(self.canvas_container)
-    layout.addWidget(self.canvas)
-    
-
-    self.window.show()
-
-    
-  def open_new_planet_dialog(self):
-    dialog = NewPlanetDialog(self.window)
-    result = dialog.exec()
-    if result != QDialog.DialogCode.Accepted:
-      return
-    planet = dialog.planet
-    print(f"planet created: {planet.name}")
-    print(f"Equator length: {planet.equator_length}")
-    print(f"Resolution:{planet.resolution}")
-
-  def load_widget(self,ui_path,parent=None):
-    loader = QUiLoader()
-    file = QFile(ui_path)
-    try:
-      widget = loader.load(file,parent)
-    finally:
-      file.close()
-    return widget
-
-#Press Functions
-
-  def press_brush_button(self):
-    self.brush_options_class = BrushOptionsWidget()
-    brush_options_widget = self.brush_options_class.widget
-    brush_index = self.tool_options.addWidget(brush_options_widget)
-    self.brush_options_class.settingsApplied.connect(self.apply_brush_settings)
-    
-    self.tool_options.setCurrentIndex(brush_index)
-
-  def apply_brush_settings(self,size,color):
-    self.canvas.set_brush_color(color)
-    self.canvas.set_brush_size(size)
+from src.worldbuilder.tools.painter.brush import BrushTool
+from src.worldbuilder.domain.document import Document
 
 
 class MainWindow2:
@@ -114,8 +38,8 @@ class MainWindow2:
 
 
   def _init_state(self):
-    self.document = 14
-    self.undo_stack = None # History of changes
+    self.document = None
+    # self.undo_stack = None # History of changes
     self.renderer = None 
     self.tools = {}
     self.current_file_path = None
@@ -221,8 +145,9 @@ class MainWindow2:
     if self.document is None:
       return
     tool = self.tools.get(name)
-    # if tool is None:
-    #   return
+    if tool is None:
+      print("No tool")
+      return
     self.canvas.set_tool(tool)
     self.active_tool_name = name
     self._show_tool_options(name)
@@ -243,7 +168,20 @@ class MainWindow2:
 
 
   def _on_new_planet(self):
-    pass
+    dialog = NewPlanetDialog(self.window)
+    result = dialog.exec()
+    if result != QDialog.DialogCode.Accepted:
+      return
+    planet = dialog.planet
+    self.document = Document.from_planet(planet,1400,800)
+    self.tools = {
+      "brush": BrushTool(self.document, color=QColor(0,0,0), size=5)
+    }
+    self.canvas.set_tool(self.tools["brush"])
+    self.window.setWindowTitle(f"Worldbuilder - {planet.name}")
+    self.active_tool_name = "brush"
+    self.canvas.update()
+    
 
   
   def _on_undo(self):
