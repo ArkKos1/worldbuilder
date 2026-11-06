@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtGui import QAction, QColor
+from PySide6.QtGui import QAction, QColor, QUndoStack
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 from PySide6.QtWidgets import (
@@ -18,6 +18,32 @@ from src.worldbuilder.tools.painter.brush import BrushTool
 from src.worldbuilder.domain.document import Document
 
 
+UI_DIR = Path(__file__).resolve().parents[3] / "ui"
+
+
+TOOL_BUTTONS = {
+  "choose": "chooseButton",
+  "select": "selectButton",
+  "pan": "panButton",
+  "brush": "brushButton",
+  "eraser": "eraserButton",
+  "fill": "fillButton",
+  "polygon": "polygonButton",
+  "edit_vertices": "editVerticesButton",
+  "measure": "measureButton",
+  "pipette": "pipetteButton",
+  "magic_wand": "magicWandButton",
+}
+
+TOOL_FACTORIES = {
+  "brush": lambda doc: BrushTool(doc, color=QColor(0, 0, 0), size=5),
+}
+
+OPTIONS_CLASSES = {
+  "brush": BrushOptionsWidget,
+}
+
+
 class MainWindow2:
 
 
@@ -32,39 +58,31 @@ class MainWindow2:
 
   def _load_ui(self,parents=None):
     loader = QUiLoader()
-    ui_file = QFile("ui/main_window.ui")
+    ui_file = QFile(str(UI_DIR / "main_window.ui"))
     self.window = loader.load(ui_file, parents)
     ui_file.close()
+    if self.window is None:
+      raise RuntimeError(f"Can't load UI: {UI_DIR / 'main_window.ui'}")
 
 
   def _init_state(self):
     self.document = None
-    # self.undo_stack = None # History of changes
-    self.renderer = None 
-    self.tools = {}
+    self.undo_stack = QUndoStack(self.window) # History of changes
+    self.tools = {} 
     self.current_file_path = None
     self.active_tool_name = None
 
-    # LAZY WIDGETS
-    self._options_widgets = {
-      "brush": {"class": BrushOptionsWidget, "instance": None}
-    }
+    # LAZY WIDGETS 
+    self._options_widgets = {}
 
 
   def _find_widgets(self):
 
     # TOOLS BUTTONS
-    self.choose_button = self._find(QToolButton,"chooseButton")
-    self.select_button = self._find(QToolButton,"selectButton")
-    self.pan_button = self._find(QToolButton,"panButton")
-    self.brush_button = self._find(QToolButton,"brushButton")
-    self.eraser_button = self._find(QToolButton,"eraserButton")
-    self.fill_button = self._find(QToolButton,"fillButton")
-    self.polygon_button = self._find(QToolButton,"polygonButton")
-    self.edit_vertices_button = self._find(QToolButton,"editVerticesButton")
-    self.measure_button = self._find(QToolButton,"measureButton")
-    self.pipette_button = self._find(QToolButton,"pipetteButton")
-    self.magic_wand_button = self._find(QToolButton,"magicWandButton")
+    self.tool_buttons = {
+      name: self._find(QToolButton, object_name)
+      for name, object_name in TOOL_BUTTONS.items()
+    }
     # ACTIONS
     self.new_planet_action = self._find(QAction,"planetAction")
     self.open_project_action = self._find(QAction,"openProjectAction")
@@ -93,7 +111,6 @@ class MainWindow2:
     self.select_action = self._find(QAction,"selectAction")
     self.brush_action = self._find(QAction,"brushAction")
     self.line_action = self._find(QAction,"lineAction")
-    self.planet_action = self._find(QAction,"planetAction")
     self.polygon_action = self._find(QAction,"polygonAction")
     self.pan_action = self._find(QAction,"panAction")
     self.edit_vertices_action = self._find(QAction,"editVerticesAction")
@@ -109,7 +126,7 @@ class MainWindow2:
     if widget is None:
       raise RuntimeError(f"Widget '{name}' ({cls.__name__}) not found")
     return widget
-  
+
 
   def _setup_canvas(self):
     layout = self.canvas_container.layout()
@@ -127,45 +144,67 @@ class MainWindow2:
     self.undo_action.triggered.connect(self._on_undo)
     self.redo_action.triggered.connect(self._on_redo)
     self.exit_action.triggered.connect(self.window.close)
-    #TOOLS
-    self.brush_button.clicked.connect(lambda: self._on_tool_selected("brush"))
-    self.eraser_button.clicked.connect(lambda: self._on_tool_selected("eraser"))
-    self.fill_button.clicked.connect(lambda: self._on_tool_selected("fill"))
-    self.magic_wand_button.clicked.connect(lambda: self._on_tool_selected("magic_wand"))
-    self.select_button.clicked.connect(lambda: self._on_tool_selected("select"))
-    self.choose_button.clicked.connect(lambda: self._on_tool_selected("choose"))
-    self.pan_button.clicked.connect(lambda: self._on_tool_selected("pan"))
-    self.polygon_button.clicked.connect(lambda: self._on_tool_selected("polygon"))
-    self.edit_vertices_button.clicked.connect(lambda: self._on_tool_selected("edit_vertices"))
-    self.measure_button.clicked.connect(lambda: self._on_tool_selected("measure"))
-    self.pipette_button.clicked.connect(lambda: self._on_tool_selected("pipette"))
+    # UNDO STACK 
+    self.undo_stack.indexChanged.connect(lambda _: self.canvas.update())
+    self.undo_stack.canUndoChanged.connect(self.undo_action.setEnabled)
+    self.undo_stack.canRedoChanged.connect(self.redo_action.setEnabled)
+    self.undo_action.setEnabled(False)
+    self.redo_action.setEnabled(False)
+    # TOOLS 
+    for name, button in self.tool_buttons.items():
+      button.clicked.connect(lambda checked=False, n=name: self._on_tool_selected(n))
 
-  
+
+  def _get_tool(self, name):
+    tool = self.tools.get(name)
+    if tool is None:
+      factory = TOOL_FACTORIES.get(name)
+      if factory is None:
+        return None
+      tool = factory(self.document)
+      self.tools[name] = tool
+    return tool
+
+
   def _on_tool_selected(self,name):
     if self.document is None:
       return
-    tool = self.tools.get(name)
+    tool = self._get_tool(name)
     if tool is None:
-      print("No tool")
+      self.window.statusBar().showMessage(f"Tool '{name}' is not implemented yet", 3000)
       return
     self.canvas.set_tool(tool)
     self.active_tool_name = name
     self._show_tool_options(name)
 
+
   def _show_tool_options(self,name):
-    entry = self._options_widgets.get(name)
-    if entry is None:
+    cls = OPTIONS_CLASSES.get(name)
+    if cls is None:
       self.tool_options.setCurrentIndex(-1)
       return
-    if entry["instance"] is None:
-      widget = entry["class"]()
-      self.tool_options.addWidget(widget.widget)
-      entry["instance"] = widget
-      slot_name = f"_on_{name}_settings"
-      if hasattr(self,slot_name):
-        widget.settingsApplied.connect(getattr(self,slot_name))
-    self.tool_options.setCurrentWidget(entry["instance"].widget)
+    widget = self._get_options_widget(name,cls)
+    self.tool_options.setCurrentWidget(widget.widget)
 
+
+  def _on_brush_settings(self, size, color):
+    tool = self.tools.get("brush")
+    if tool is None:
+      return
+    tool.size = size
+    tool.color = QColor(color)
+
+
+  def _get_options_widget(self,name,cls):
+    widget = self._options_widgets.get(name)
+    if widget is None:
+      widget = cls()
+      self.tool_options.addWidget(widget.widget)
+      slot = getattr(self,f"_on_{name}_settings", None)
+      if slot is not None:
+        widget.settingsApplied.connect(slot)
+      self._options_widgets[name] = widget
+    return widget
 
   def _on_new_planet(self):
     dialog = NewPlanetDialog(self.window)
@@ -174,22 +213,17 @@ class MainWindow2:
       return
     planet = dialog.planet
     self.document = Document.from_planet(planet,1400,800)
-    self.tools = {
-      "brush": BrushTool(self.document, color=QColor(0,0,0), size=5)
-    }
-    self.canvas.set_tool(self.tools["brush"])
+    self.canvas.set_document(self.document)
+    self.undo_stack.clear()
+    self.tools = {} 
+    self._on_tool_selected("brush")
     self.window.setWindowTitle(f"Worldbuilder - {planet.name}")
-    self.active_tool_name = "brush"
     self.canvas.update()
-    
 
-  
+
   def _on_undo(self):
-    pass
+    self.undo_stack.undo()
 
-  
+
   def _on_redo(self):
-    pass
-
-  
-
+    self.undo_stack.redo()
