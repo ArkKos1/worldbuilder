@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/icons">
+    <file>assets/icons/change_arrow.svg</file>
     <file>assets/icons/brush.svg</file>
     <file>assets/icons/colorize.svg</file>
     <file>assets/icons/colors.svg</file>

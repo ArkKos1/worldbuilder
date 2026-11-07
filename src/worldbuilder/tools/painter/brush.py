@@ -32,6 +32,7 @@ class BrushTool(BaseTool):
     self._end_stroke()
     self._painter = QPainter(layer.image)
     self._painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+    self._setup_painter(self._painter)
     self._painter.setPen(self._make_pen())
     self._last_pos = pos
     self._painter.drawPoint(pos)
@@ -66,3 +67,6 @@ class BrushTool(BaseTool):
     margin = self.size / 2 + 2
     rect = QRectF(a, b).normalized().adjusted(-margin, -margin, margin, margin)
     self.dirty.emit(rect)
+
+  def _setup_painter(self,painter):
+    pass

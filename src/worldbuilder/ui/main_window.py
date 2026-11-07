@@ -14,6 +14,9 @@ from PySide6.QtWidgets import (
 from src.worldbuilder.ui.new_planet_dialog import NewPlanetDialog
 from src.worldbuilder.ui.canvas_widget import CanvasWidget
 from src.worldbuilder.ui.widgets.parameters.brush import BrushOptionsWidget
+from src.worldbuilder.ui.widgets.parameters.eraser import EraserOptionsWidget
+
+from src.worldbuilder.tools.painter.eraser import EraserTool
 from src.worldbuilder.tools.painter.brush import BrushTool
 from src.worldbuilder.domain.document import Document
 
@@ -37,14 +40,16 @@ TOOL_BUTTONS = {
 
 TOOL_FACTORIES = {
   "brush": lambda doc: BrushTool(doc, color=QColor(0, 0, 0), size=5),
+  "eraser": lambda doc: EraserTool(doc,size=5)
 }
 
 OPTIONS_CLASSES = {
   "brush": BrushOptionsWidget,
+  "eraser": EraserOptionsWidget,
 }
 
 
-class MainWindow2:
+class MainWindow:
 
 
   def __init__(self,parents=None):
@@ -153,6 +158,7 @@ class MainWindow2:
     # TOOLS 
     for name, button in self.tool_buttons.items():
       button.clicked.connect(lambda checked=False, n=name: self._on_tool_selected(n))
+    
 
 
   def _get_tool(self, name):
@@ -187,12 +193,19 @@ class MainWindow2:
     self.tool_options.setCurrentWidget(widget.widget)
 
 
-  def _on_brush_settings(self, size, color):
+  def _on_brush_settings(self, size, color, secondary_color):
     tool = self.tools.get("brush")
     if tool is None:
       return
     tool.size = size
     tool.color = QColor(color)
+    tool.secondary_color = QColor(secondary_color)
+
+  def _on_eraser_settings(self,size):
+    tool = self.tools.get("eraser")
+    if tool is None:
+      return
+    tool.size = size
 
 
   def _get_options_widget(self,name,cls):
@@ -203,6 +216,10 @@ class MainWindow2:
       slot = getattr(self,f"_on_{name}_settings", None)
       if slot is not None:
         widget.settingsApplied.connect(slot)
+        
+      if name == "brush" or name == "eraser":
+        self.canvas.brushSizeSignal.connect(widget.change_brush_size)
+
       self._options_widgets[name] = widget
     return widget
 

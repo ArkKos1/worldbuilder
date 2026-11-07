@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QPainter, QColor
-from PySide6.QtCore import Qt, QPointF, QRect, QRectF
+from PySide6.QtCore import Qt, QPointF, QRect, QRectF, Signal
 
 from src.worldbuilder.domain.layer import RasterLayer
 
@@ -10,10 +10,11 @@ MAX_SCALE = 10.0
 ZOOM_STEP = 1.15
 BACKGROUND = QColor("#434B4D")
 PAPER = QColor(255, 255, 255)
-PAN_BUTTONS = (Qt.MouseButton.RightButton, Qt.MouseButton.MiddleButton)
+PAN_BUTTONS = (Qt.MouseButton.RightButton)
 
 
 class CanvasWidget(QWidget):
+  brushSizeSignal = Signal(int)
   def __init__(self, parent=None):
     super().__init__(parent)
     self.setMinimumSize(400, 400)
@@ -106,7 +107,7 @@ class CanvasWidget(QWidget):
     if canvas_rect.isEmpty():
       return
 
-
+    # Сглаживание только при уменьшении
     painter.setRenderHint(
       QPainter.RenderHint.SmoothPixmapTransform,
       self._scale < 1.0,
@@ -114,24 +115,11 @@ class CanvasWidget(QWidget):
     painter.translate(self._offset)
     painter.scale(self._scale, self._scale)
 
-    top_left = self._screen_to_canvas(QPointF(event.rect().topLeft()))
-    bottom_right = self._screen_to_canvas(QPointF(event.rect().bottomRight()))
-    visible = (
-      QRectF(top_left, bottom_right)
-      .toAlignedRect()
-      .adjusted(-1, -1, 1, 1)
-      .intersected(canvas_rect)
-    )
-    if visible.isEmpty():
-      return
-
-    painter.fillRect(visible, PAPER)
-    for layer in self.document.layers:
-      if not layer.visible:
-        continue
-      if isinstance(layer, RasterLayer) and layer.image is not None:
+    painter.fillRect(canvas_rect, PAPER)
+    for layer in self.document.layers:  # первый слой снизу
+      if layer.visible and isinstance(layer, RasterLayer) and layer.image is not None:
         painter.setOpacity(layer.opacity)
-        painter.drawImage(visible, layer.image, visible)
+        painter.drawImage(0, 0, layer.image)
     painter.setOpacity(1.0)
 
 
@@ -169,8 +157,17 @@ class CanvasWidget(QWidget):
       self.tool.on_release(pos, event.button())
 
   def wheelEvent(self, event):
-    dy = event.angleDelta().y()
-    if dy == 0:
-      return
-    factor = ZOOM_STEP if dy > 0 else 1 / ZOOM_STEP
-    self.zoom_by(factor, event.position())
+    if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+      dy = event.angleDelta().y()
+      if dy == 0:
+        return
+      factor = ZOOM_STEP if dy > 0 else 1 / ZOOM_STEP
+      self.zoom_by(factor, event.position())
+    else:
+      delta = event.angleDelta().y()
+      if delta:
+          step = 1 if delta > 0 else -1
+          self.brushSizeSignal.emit(step)
+      event.accept()
+
+    
