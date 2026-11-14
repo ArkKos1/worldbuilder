@@ -1,5 +1,11 @@
 <RCC>
   <qresource prefix="/icons">
+    <file>assets/icons/remake.svg</file>
+    <file>assets/icons/picker.svg</file>
+    <file>assets/icons/thermostat.svg</file>
+    <file>assets/icons/mountain.svg</file>
+    <file>assets/icons/space.svg</file>
+    <file>assets/icons/planet.svg</file>
     <file>assets/icons/change_arrow.svg</file>
     <file>assets/icons/brush.svg</file>
     <file>assets/icons/colorize.svg</file>

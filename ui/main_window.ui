@@ -340,7 +340,7 @@
            </property>
            <property name="icon">
             <iconset resource="../resources.qrc">
-             <normaloff>:/icons/assets/icons/brush.svg</normaloff>:/icons/assets/icons/brush.svg</iconset>
+             <normaloff>:/icons/assets/icons/picker.svg</normaloff>:/icons/assets/icons/picker.svg</iconset>
            </property>
            <property name="iconSize">
             <size>

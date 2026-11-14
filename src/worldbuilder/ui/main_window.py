@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtGui import QAction, QColor, QUndoStack
+from PySide6.QtGui import QAction, QColor, QUndoStack, QKeySequence, QShortcut
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 from PySide6.QtWidgets import (
@@ -39,8 +39,8 @@ TOOL_BUTTONS = {
 }
 
 TOOL_FACTORIES = {
-  "brush": lambda doc: BrushTool(doc, color=QColor(0, 0, 0), size=5),
-  "eraser": lambda doc: EraserTool(doc,size=5)
+  "brush": lambda doc,undo: BrushTool(doc, undo, color=QColor(0, 0, 0), size=5),
+  "eraser": lambda doc,undo: EraserTool(doc,undo, size=5)
 }
 
 OPTIONS_CLASSES = {
@@ -49,11 +49,12 @@ OPTIONS_CLASSES = {
 }
 
 
-class MainWindow:
+class MainWindow(QMainWindow):
 
 
-  def __init__(self,parents=None):
-    self._load_ui(parents) # Loader
+  def __init__(self,parent=None):
+    super().__init__(parent)
+    self._load_ui(parent) # Loader
     self._init_state() # State
     self._find_widgets() # All of the widgets
     self._setup_canvas() # Canvas
@@ -72,7 +73,8 @@ class MainWindow:
 
   def _init_state(self):
     self.document = None
-    self.undo_stack = QUndoStack(self.window) # History of changes
+    self.undo_stack = QUndoStack(self.window)
+    self.undo_stack.setUndoLimit(50) # History of changes
     self.tools = {} 
     self.current_file_path = None
     self.active_tool_name = None
@@ -150,11 +152,15 @@ class MainWindow:
     self.redo_action.triggered.connect(self._on_redo)
     self.exit_action.triggered.connect(self.window.close)
     # UNDO STACK 
-    self.undo_stack.indexChanged.connect(lambda _: self.canvas.update())
+    self.undo_stack.indexChanged.connect(self._on_undo_index_changed)
     self.undo_stack.canUndoChanged.connect(self.undo_action.setEnabled)
     self.undo_stack.canRedoChanged.connect(self.redo_action.setEnabled)
     self.undo_action.setEnabled(False)
     self.redo_action.setEnabled(False)
+    self.undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"),self.window)
+    self.undo_shortcut.activated.connect(self._on_undo)
+    self.redo_shortcut = QShortcut(QKeySequence("Ctrl+Y"),self.window)
+    self.redo_shortcut.activated.connect(self._on_redo)
     # TOOLS 
     for name, button in self.tool_buttons.items():
       button.clicked.connect(lambda checked=False, n=name: self._on_tool_selected(n))
@@ -167,7 +173,7 @@ class MainWindow:
       factory = TOOL_FACTORIES.get(name)
       if factory is None:
         return None
-      tool = factory(self.document)
+      tool = factory(self.document, self.undo_stack)
       self.tools[name] = tool
     return tool
 
@@ -244,3 +250,9 @@ class MainWindow:
 
   def _on_redo(self):
     self.undo_stack.redo()
+
+  def _on_undo_index_changed(self,index):
+    self.canvas.update()
+
+  def __del__(self):
+    print("CanvasWidget Python wrapper deleted")

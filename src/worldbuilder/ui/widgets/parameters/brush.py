@@ -3,7 +3,7 @@ from pathlib import Path
 from PySide6.QtCore import QFile, QObject, Signal, QSignalBlocker, Qt
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QSpinBox, QPushButton,QComboBox, QSlider, QColorDialog
+from PySide6.QtWidgets import QSpinBox, QPushButton,QComboBox, QSlider, QColorDialog, QCheckBox
 
 
 UI_FILE = Path(__file__).resolve().parents[5] / "ui" / "widgets" / "parameters" / "brush.ui"
@@ -48,6 +48,8 @@ class BrushOptionsWidget(QObject):
     self.secondary_color_button = self.widget.findChild(QPushButton, "secondaryColorButton")
     self.change_colors_button = self.widget.findChild(QPushButton,"changeColorButton")
 
+    self.antialiasing_check_box = self.widget.findChild(QCheckBox, "antialiasingCheckBox")
+    
     self.size_spin.setValue(self.size)
     self.red_spin.setValue(self.prime_color.red())
     self.green_spin.setValue(self.prime_color.green())
@@ -57,6 +59,7 @@ class BrushOptionsWidget(QObject):
     self.change_colors_button.clicked.connect(self._change_colors)
     self.prime_color_button.clicked.connect(self._new_prime_color)
     self.secondary_color_button.clicked.connect(self._new_secondary_color)
+
 
     #COLOR PALETTE 
     self.paletteButtons = {}

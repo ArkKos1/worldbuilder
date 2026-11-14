@@ -1,5 +1,5 @@
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QImage
+from PySide6.QtCore import QRect
+from PySide6.QtGui import QImage, QPainter,QUndoCommand
 
 
 class Command:
@@ -11,27 +11,36 @@ class Command:
 
 
 
-class PaintCommand(Command):
-  def __init__(self,layer,before,after):
+class PaintCommand(QUndoCommand):
+  def __init__(self,layer,rect: QRect, before_patch: QImage, after_patch: QImage, text="Paint"):
+    super().__init__(text)
     self.layer = layer
-    self.before = before
-    self.after = after
-
-  def execute(self):
-    self.layer.image = self.after
+    self.rect = QRect(rect)
+    self.before_patch = before_patch
+    self.after_patch = after_patch
+  
+  def redo(self):
+    self._apply(self.after_patch)
 
   def undo(self):
-    self.layer.image = self.before
+    self._apply(self.before_patch)
+
+  def _apply(self,patch: QImage):
+    painter = QPainter(self.layer.image)
+    painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+    painter.drawImage(self.rect,patch)
+    painter.end()
 
 
-class SetAttrCommand(Command):
-  def __init__(self,target,attr_name,old_value,new_value):
+class SetAttrCommand(QUndoCommand):
+  def __init__(self,target,attr_name,old_value,new_value, text=None):
+    super().__init__(text or f"Change {attr_name}")
     self.target = target
     self.attr_name = attr_name
     self.old_value = old_value
     self.new_value = new_value
 
-  def execute(self):
+  def redo(self):
     setattr(self.target,self.attr_name,self.new_value)
 
   def undo(self):
